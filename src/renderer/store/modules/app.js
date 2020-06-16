@@ -1,5 +1,19 @@
 import Vue from 'vue'
 
+const nextTickInterval = 300 // 更新时长由 styles/sidebar.scss 的 hideSidebar 类的动画决定
+
+function reactForSidebar () {
+  Vue.nextTick(() => {
+    let timer = setInterval(() => {
+      Vue.triggerResize()
+    }, 300 / 30)
+    setTimeout(() => {
+      clearInterval(timer)
+      Vue.triggerResize()
+    }, nextTickInterval)
+  })
+}
+
 const app = {
   state: {
     sidebar: {
@@ -8,25 +22,17 @@ const app = {
     routerView: {
       showMode: 0 // 0 for hidden, 1 for normal, 2 for maxsize
     },
-    isAppFullScreen: false
+    isAppFullScreen: false,
+    timeAnalysisMode: {mode: 'global', display: [], enable: false}
   },
   mutations: {
     TOGGLE_SIDEBAR: state => {
       state.sidebar.opened = !state.sidebar.opened
-      const nextTickInterval = 300 // 更新时长由 styles/sidebar.scss 的 hideSidebar 类的动画决定
-      Vue.nextTick(() => {
-        let timer = setInterval(() => {
-          Vue.triggerResize()
-        }, 300 / 30)
-        setTimeout(() => {
-          clearInterval(timer)
-          Vue.triggerResize()
-        }, nextTickInterval)
-      })
+      reactForSidebar()
     },
     CHANGE_TOGGLE_SIDEBAR_STATUS: (state, bool) => {
       state.sidebar.opened = bool
-      Vue.triggerResize()
+      reactForSidebar()
     },
     CHANGE_ROUTER_VIEW_SHOW_MODE: (state, mode) => {
       state.routerView.showMode = mode
@@ -34,6 +40,9 @@ const app = {
     },
     TOGGLE_FULL_SCREEN: (state, bool) => {
       state.isAppFullScreen = bool
+    },
+    CHANGE_TIME_ANALYSIS_MODE: (state, mode) => {
+      state.timeAnalysisMode = mode
     }
   },
   actions: {
@@ -48,6 +57,9 @@ const app = {
     },
     toggleFullScreen ({ commit }, bool) {
       commit('TOGGLE_FULL_SCREEN', bool)
+    },
+    changeTimeAnalysisMode ({ commit }, mode) {
+      commit('CHANGE_TIME_ANALYSIS_MODE', mode)
     }
   }
 }

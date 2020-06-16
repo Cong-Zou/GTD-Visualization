@@ -4,7 +4,7 @@ import { Notification } from 'element-ui'
 // create an axios instance
 const service = axios.create({
   baseURL: process.env.BASE_API, // api的base_url
-  timeout: 10000, // request timeout
+  timeout: 20000, // request timeout
   headers: {
     'Access-Control-Allow-Origin': '*',
     'Content-Type': 'application/json;charset=utf-8'
@@ -18,7 +18,6 @@ service.interceptors.request.use(config => {
   return config
 }, error => {
   // Do something with request error
-  console.log(error) // for debug
   Promise.reject(error)
 })
 
@@ -26,7 +25,6 @@ service.interceptors.request.use(config => {
 service.interceptors.response.use(
   response => response,
   error => {
-    console.log('err' + error)// for debug
     Notification({
       message: error.message,
       type: 'error',

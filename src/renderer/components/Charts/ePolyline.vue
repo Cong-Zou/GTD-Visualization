@@ -106,9 +106,9 @@ export default {
   },
   data () {
     var t = null
-    if (this.t === 'sumProp') { t = 'SUM of Prop' }
-    if (this.t === 'count') { t = 'SUM of Count' }
-    if (this.t === 'sumKill') { t = 'SUM of Kill' }
+    if (this.t === 'sumProp') { t = 'Economic losses' }
+    if (this.t === 'count') { t = 'Number of attacks' }
+    if (this.t === 'sumKill') { t = 'Death toll' }
     return {
       chart: null,
       title: t
@@ -133,6 +133,8 @@ export default {
         backgroundColor: this.getColor(this.backgroundColor),
         title: {
           text: this.title,
+          top: '8%',
+          left: '8%',
           textStyle: {
             color: 'Orange'
           }
@@ -169,7 +171,12 @@ export default {
           }
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          splitLine: {
+            lineStyle: {
+              color: 'rgba(128,128,128,0.1)'
+            }
+          }
         },
         series: this.setSeriesByData()
       })

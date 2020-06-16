@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>全球恐怖袭击数据可视化系统</title>
+    <title>Global Terrorist Attacks Visualization System</title>
     <% if (htmlWebpackPlugin.options.nodeModules) { %>
       <!-- Add `node_modules/` to global paths so `require` works properly in development -->
       <script>
@@ -14,7 +14,7 @@
     <div id="app"></div>
     <!-- Set `__static` path to static files in production -->
     <script>
-      if (process.env.NODE_ENV !== 'development') window.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+      try{if(process.env.NODE_ENV!=='development')window.__static=require('path').join(__dirname,'/static').replace(/\\/g,'\\\\')}catch(e){}
     </script>
 
     <!-- webpack builds are automatically injected -->

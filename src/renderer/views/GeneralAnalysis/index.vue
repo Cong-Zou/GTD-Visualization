@@ -14,8 +14,8 @@
 
 <script>
 import RotateSelector from '@/components/RotateSelector'
-import year3ModelPie from '@/components/charts/year3ModelPie'
-import regionStatisticsBar from '@/components/charts/regionStatisticsBar'
+import year3ModelPie from '@/components/Charts/year3ModelPie'
+import regionStatisticsBar from '@/components/Charts/regionStatisticsBar'
 import { getPie, getBar } from '@/api/generalAnalysisApi'
 export default {
   name: 'GeneralAnalysis',
@@ -27,7 +27,6 @@ export default {
   },
   methods: {
     getYear (year) {
-      console.log(year)
       getPie({
         format: 'json',
         year: year

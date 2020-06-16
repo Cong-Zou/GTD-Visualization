@@ -125,9 +125,9 @@ export default {
           text: this.title,
           show: true,
           left: 'center',
-          top: 'bottom',
+          bottom: '5%',
           textStyle: {
-            color: '#00A383'
+            color: '#ccc'
           }
         },
 
@@ -195,7 +195,6 @@ export default {
                     newParamsName = params
                   }
                   // 将最终的字符串返回
-                  console.log(JSON.stringify(newParamsName))
                   return newParamsName
                 }
               }

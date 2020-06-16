@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="TimeAnalysisMapView"></div>
+    <div :id="mapId"></div>
   </div>
 </template>
 
@@ -9,18 +9,26 @@ import L from 'leaflet'
 export default {
   name: 'MapView',
   props: {
+    mapId: {
+      type: String,
+      requre: true
+    },
     displayGeojsonData: {
       type: Object,
-      default: {}
+      default: () => {
+        return {}
+      }
     },
-    // global/region/country
+    // global/region/country/detail
     displayMode: {
       type: String,
       default: 'global'
     },
     displayPointData: {
       type: Object,
-      default: {}
+      default: () => {
+        return {}
+      }
     },
     selectedId: {
       type: Number,
@@ -40,7 +48,9 @@ export default {
         maxZoom: 18
       },
       currentPointLayerGroup: new L.LayerGroup(),
-      currentPolygonLayerGroup: new L.LayerGroup()
+      currentPolygonLayerGroup: new L.LayerGroup(),
+      currentRegion: undefined,
+      currentCountry: undefined
     }
   },
   computed: {
@@ -50,7 +60,7 @@ export default {
       } else if (this.displayMode === 'region') {
         return '#84E900'
       } else if (this.displayMode === 'country') {
-        return '#FF4100'
+        return '#70CDFF'
       }
     },
     pointType () {
@@ -78,7 +88,7 @@ export default {
         return {
           pointToLayer: function (geoJsonPoint, latlng) {
             const pointIcon = L.icon({
-              iconUrl: '../../../../static/icons/point_light.png',
+              iconUrl: 'static/icons/point_light.png',
               iconSize: [10, 10]
             })
             return L.marker(latlng, {icon: pointIcon, opacity: 0.8})
@@ -87,10 +97,113 @@ export default {
       } else if (this.displayMode === 'country') {
         return {
           pointToLayer: function (geoJsonPoint, latlng) {
+            const pointIcon = L.icon({
+              iconUrl: 'static/icons/pin_red.png',
+              iconSize: [16, 24],
+              iconAnchor: [8, 24]
+            })
+            const activeIcon = L.icon({
+              iconUrl: 'static/icons/pin_blue.png',
+              iconSize: [16, 24],
+              iconAnchor: [8, 24]
+            })
+            const layer = L.marker(latlng, {
+              icon: pointIcon,
+              riseOnHover: true
+            })
+            // const pointOptions = {
+            //   radius: 7,
+            //   stroke: false,
+            //   color: '#E66417',
+            //   weight: 1,
+            //   opacity: 1,
+            //   fill: true,
+            //   fillOpacity: 1,
+            //   render: L.svg(),
+            //   className: 'main-point-marker'
+            // }
+            // const layer = L.circleMarker(latlng, pointOptions)
+            // layer.id = geoJsonPoint.id
+            // layer.on('mouseover', function () {
+            //   layer.setStyle({
+            //     fillColor: '#EA0037'
+            //   })
+            // })
+            // layer.on('mouseout', function () {
+            //   layer.setStyle({
+            //     fillColor: '#E66417'
+            //   })
+            // })
+            layer.on('mouseover', function () {
+              layer.setIcon(activeIcon)
+            })
+            layer.on('mouseout', function () {
+              layer.setIcon(pointIcon)
+            })
+            layer.on('click', function () {
+              that.map.flyTo(L.latLng(layer.getLatLng().lat, layer.getLatLng().lng + 2), that.map.getZoom() + 2)
+              that.$emit('map-region-click', geoJsonPoint.id)
+            })
+            return layer
+          },
+          onEachFeature: function (feature, layer) {
+            const ringOptions = {
+              radius: 16,
+              stroke: true,
+              color: '#A5E8B7',
+              weight: 2,
+              opacity: 1,
+              fill: false,
+              render: L.svg(),
+              className: 'main-firstring-marker'
+            }
+            const firstRingLayer = L.circleMarker(layer.getLatLng(), ringOptions)
+            ringOptions.className = 'main-secondring-marker'
+            const secondRingLayer = L.circleMarker(layer.getLatLng(), ringOptions)
+            firstRingLayer.on('mouseover', function () {
+              firstRingLayer.setStyle({
+                color: '#F80012'
+              })
+            })
+            secondRingLayer.on('mouseover', function () {
+              secondRingLayer.setStyle({
+                color: '#A5E8B7'
+              })
+            })
+            firstRingLayer.on('mouseout', function () {
+              firstRingLayer.setStyle({
+                color: '#A5E8B7'
+              })
+            })
+            secondRingLayer.on('mouseout', function () {
+              secondRingLayer.setStyle({
+                color: '#A5E8B7'
+              })
+            })
+            that.currentPointLayerGroup.addLayer(firstRingLayer)
+            // that.currentPointLayerGroup.addLayer(secondRingLayer)
+            // layer.on('mouseover', function () {
+            //   layer.setStyle({
+            //     fillColor: '#EA0037'
+            //   })
+            // })
+            // layer.on('mouseout', function () {
+            //   layer.setStyle({
+            //     fillColor: '#E66417'
+            //   })
+            // })
+            // layer.on('click', function () {
+            //   that.$emit('map-region-click', feature.id)
+            // })
+          }
+        }
+      } else if (this.displayMode === 'detail') {
+        return {
+          pointToLayer: function (geoJsonPoint, latlng) {
             const pointOptions = {
-              radius: 7,
+              radius: 10,
               stroke: false,
-              color: '#E66417',
+              color: '#0476D9',
               weight: 1,
               opacity: 1,
               fill: true,
@@ -98,16 +211,14 @@ export default {
               render: L.svg(),
               className: 'main-point-marker'
             }
-            const layer = L.circleMarker(latlng, pointOptions)
-            layer.id = geoJsonPoint.id
             return L.circleMarker(latlng, pointOptions)
           },
           onEachFeature: function (feature, layer) {
             const ringOptions = {
-              radius: 16,
+              radius: 30,
               stroke: true,
-              color: '#E66417',
-              weight: 2,
+              color: '#70CDFF',
+              weight: 3,
               opacity: 1,
               fill: false,
               render: L.svg(),
@@ -201,29 +312,37 @@ export default {
       const that = this
       if (newMode === 'region') {
         if (oldMode === 'global') {
+          // this.currentRegion = this.selectedId
           this.currentPolygonLayerGroup.getLayers()[0].eachLayer(function (layer) {
             if (layer.id === that.selectedId) {
               layer.setStyle({fillOpacity: 0.9})
               const bounds = layer.getBounds()
+              that.currentRegion = bounds
               that.map.flyToBounds(bounds, {paddingBottomRight: [0, 0]})
             }
           })
+        } else {
+          this.map.flyToBounds(this.currentRegion, {paddingBottomRight: [0, 0]})
         }
       } else if (newMode === 'country') {
         if (oldMode === 'region') {
+          // this.currentCountry = this.selectedId
           this.currentPolygonLayerGroup.getLayers()[0].eachLayer(function (layer) {
             if (layer.id === that.selectedId) {
               layer.setStyle({fillOpacity: 0.9})
               const bounds = layer.getBounds()
+              that.currentCountry = bounds
               that.map.flyToBounds(bounds)
             }
           })
+        } else {
+          this.map.flyToBounds(this.currentCountry)
         }
       } else if (newMode === 'global') {
         this.map.setView([37, 38], 2)
       }
     },
-    displayPointData (newData, oldData) {
+    displayPointData (newData, oldData, deep = true) {
       this.currentPointLayerGroup.clearLayers()
       const geoJSON = L.geoJSON(newData, this.pointType)
       // geoJSON.mode = this.displayMode

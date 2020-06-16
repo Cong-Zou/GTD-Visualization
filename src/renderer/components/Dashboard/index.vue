@@ -1,12 +1,16 @@
 <template>
-  <div class="map-view" v-loading="loading" element-loading-text="数据加载中...">
+  <div class="map-view" v-loading="loading" element-loading-text="Loading Data...">
+    <github-corner v-show="!componentsHidden"></github-corner>
     <leaflet-view mapId="dashboard-leaflet-map" :currentDailyData="dailyDataForMapView"></leaflet-view>
-    <date-display class="date-display" :date="currentDate" :freshInterval="freshInterval" :hidden="routerViewMode === 2"></date-display>
+    <transition name="fade">
+      <date-display class="date-display" :date="currentDate" :freshInterval="freshInterval" v-show="!componentsHidden"></date-display>
+    </transition>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import GithubCorner from '@/components/GithubCorner'
 import LeafletView from '@/components/MapView/LeafletView'
 import DateDisplay from '@/components/LedDateDisplay'
 import { isLeapYear, getDateByDaysInYear } from '@/utils'
@@ -14,13 +18,14 @@ import { getGeneral } from '@/api/dashboardApi'
 
 export default {
   components: {
+    GithubCorner,
     LeafletView,
     DateDisplay
   },
   data () {
     return {
       mapId: 'dashboard-leaflet-map',
-      year: 1970,
+      year: 2001,
       geojsonData: {},
       currentDay: 1,
       dailyDataForMapView: [],
@@ -33,7 +38,10 @@ export default {
   computed: {
     ...mapGetters([
       'routerViewMode'
-    ])
+    ]),
+    componentsHidden () {
+      return this.routerViewMode === 2
+    }
   },
   mounted () {
     // Add this view to cache
@@ -79,9 +87,24 @@ export default {
         this.currentDate = getDateByDaysInYear(this.currentDay, this.year)
       }
       this.currentDay = this.currentDay % this.totalDays + 1
-      // console.log(this.currentDate.getFullYear() + '年' +
-      //     (this.currentDate.getMonth() + 1) + '月' +
-      //     this.currentDate.getDate() + '日')
+    },
+    dateToEnglish (date) {
+      const m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Spt', 'Oct', 'Nov', 'Dec']
+      const w = ['Monday', 'Tuseday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+      const d = ['st', 'nd', 'rd', 'th']
+      const mn = date.getMonth()
+      const wn = date.getDay()
+      const dn = date.getDate()
+      let dns = ''
+      if (((dn) < 1) || ((dn) > 3)) {
+        dns = d[3]
+      } else {
+        dns = d[(dn) - 1]
+        if ((dn === 11) || (dn === 12)) {
+          dns = d[3]
+        }
+      }
+      return m[mn] + ' ' + dn + dns + ' ' + w[wn - 1] + ' ' + date.getFullYear()
     }
   }
 }
@@ -104,5 +127,11 @@ export default {
   padding: 20px;
   border-radius: 50px;
   box-shadow: 0 0 60px orange;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .4s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>

@@ -46,6 +46,15 @@ export function getGeneral (params) {
   })
 }
 
+// get points geojson
+export function getGeneral2 (params) {
+  return request({
+    url: '/gtd/api/tdgeneral2',
+    method: 'get',
+    params
+  })
+}
+
 // get statistics data
 export function getStatistics (params) {
   return request({
@@ -68,6 +77,16 @@ export function getInfo (params) {
 export function getGlobalStatistics (params) {
   return request({
     url: '/gtd/api/tdinfo/globalStatistics',
+    method: 'get',
+    params
+  })
+}
+
+// get detail information by event id
+export function getEventById (id, params) {
+  const url = '/gtd/api/tdinfo/' + id
+  return request({
+    url: url,
     method: 'get',
     params
   })
